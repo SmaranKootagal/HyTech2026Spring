@@ -1,3 +1,7 @@
+var Dealer_Score= 0
+var Player_Score= 0
+
+
 class Card{
     value;
     type;
@@ -23,7 +27,17 @@ return suits.flatMap((suit) => {
     })
 
 }
+//Betting System
 
+document.querySelectorAll('.chip'). forEach (chip => {
+    chip.addEventListener('click', () => {
+        if (STATE.phase !== 'bet') return;
+        const val= parseInt(chip.CDATA_SECTION_NODE.val);
+        if(STATE.bet +val > STATE.balance) return;
+        STATE.bet +=val;
+        updateBank();
+    });
+});
 
 
 
@@ -32,16 +46,6 @@ function shuffle(cards) {
         let swap_index = Math.round(Math.random() * (cards.length - 1 - i) + i);
         [cards[i], cards[swap_index]] = [cards[swap_index], cards[i]];
     }
-}
-function print_cards(cards) {
-    cards.forEach((card) => {
-        print_card(card);
-    })
-}
-
-
-function print_card(card) {
-    console.log (card.value, card.type)
 }
 
 function reset(){
@@ -53,7 +57,6 @@ function reset(){
 
 function deal(){
     let card = cards.pop();
-    print_card(card);
     display_card(card);
     
 }
@@ -63,10 +66,41 @@ deal();
 deal();
 deal();
 deal();
-function hit_logic(){
-    deal();
+function hit() {
+  if (STATE.phase !== 'play') return;
+  STATE.playerHand.push(drawCard());
+  render(true);
+  setPlayButtons(false);  // no double after hit
+  if (isBust(STATE.playerHand)) {
+    revealDealer();
+    endRound('bust');
+  }
 }
-function stand_logic(){
-    console.log("stand")
+ 
+function stand() {
+  if (STATE.phase !== 'play') return;
+  revealDealer();
+  dealerPlay();
+}
+ 
+function doubleDown() {
+  if (STATE.phase !== 'play') return;
+  STATE.balance -= STATE.bet;
+  STATE.bet *= 2;
+  updateBank();
+  STATE.playerHand.push(drawCard());
+  render(true);
+  revealDealer();
+  if (isBust(STATE.playerHand)) {
+    endRound('bust');
+  } else {
+    dealerPlay();
+  }
+}
+function revealDealer (){
+    render(false);
 }
 
+function dealerPlay(){
+    while (handValue ())
+}

@@ -6,11 +6,94 @@
     <title>Document</title>
     <link rel="stylesheet" href="./style.css">
 </head>
-<body>
-    <p>hello world</p>
-    <button onclick="hit_logic()">Hit</button>
-    <button onclick="stand_logic()">Stand</button>
+<style>
+    :root{
+        --felt: #1a3a2a;
+        --felt-light: #1f4433;
+        --gold: #c9a84c;
+        --gold-light:#e8c96a;
+        --cream: #f5eedc;
+        --red: #c0392b;
+        --dark: #0d1f17;
+        --chip-green: #27ae60;
+    }
+    body{
+        background: var(--dark);
+        font-family: 'DM Mono', monospace;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+        color: var(--cream);
+    }
+    /*Blackjack Table*/
+    #table{
+        width: min(900px, 98vw);
+        background: radial-gradient(ellipse at 50% 40%, var(--felt-light) 0%, var(--felt) 60%, #0f2a1e 100%);
+        border-radius: 120px;
+        padding: 36px 48px 32px;
+        position: relative;
+        box-shadow: 0 0 0 6px #0d1f17, 0 0 0 10px var(--gold) , 0 30px 80px #000a;
+        border: none;
+    }
+    #table::before{
+        content: '';
+        position: absolute;
+        inset: 14px;
+        border-radius: 108px;
+        border: 1.5px solid rgba(201,168,76,0.2)
+    }
+    h1{
+        font-family: 'Playfair Display', serif;
+        text-align: center;
+        font-size: clamp(2rem, 5vw, 3rem);
+        color: var(--gold);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-shadow: 0 2px 16px rgba(201,168,76,0.35);
+        margin-bottom: 4px;
+    }
 
+    .subtitle{
+        text-align: center;
+        font-size: 0.7rem;
+        letter-spacing: 0.3rem;
+        color: rgba(201,168,76,0.5)
+        
+    }
+</style>
+<body>
+    <div id="table">
+        <h1>Blackjack</h1>
+        <p class="subtitle">Classic Cassino Rules · Dealer Stands on Soft 17</p>
+        
+        <button onclick="hit_logic()">Hit</button>
+    <button onclick="stand_logic()">Stand</button>
+<div class="bank-row">
+    <div class="bank-info"> Balance <span id="balance-display">$500</span>
+        <div id="bet-display"> Bet:  <strong id="bet-amount">$0</strong></span>
+</div>
+<div class="chip-row" id="chip-row">
+    <div class="chip" data-val="5">$5</div>
+    <div class="chip" data-val="10">$10</div>
+    <div class="chip" data-val="25">$25</div>
+    <div class="chip" data-val="50">$50</div>
+    <div class="chip" data-val="100">$100</div>
+</div>
+
+<div class="btn-row" id="action-btns">
+    <button class="btn btn-gold" id="btn-deal"   onclick="deal()">Deal</button>
+    <button class="btn btn-red" id="btn-clear-bet" onclick="clearBet()">Clear Bet</button>
+</div>
+<div class="btn-row" id="play-btns" style="display:none">
+    <button class="btn btn-green" id="btn-hit" onclick="hit()">Hit</button>
+        <button class="btn btn-gold" id="btn-stand" onclick="stand()">Stand</button>
+            <button class="btn btn-blue" id="btn-double" onclick="doubleDown()">Double</button>
+
+</div>
+    </div>
 <script src="./visuals.js"> </script>
 <script src="./app.js"> </script>
 </body>
