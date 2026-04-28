@@ -66,6 +66,7 @@ deal();
 deal();
 deal();
 deal();
+//Hit, Stand, and Double Down(Player Actions in general ig)
 function hit() {
   if (STATE.phase !== 'play') return;
   STATE.playerHand.push(drawCard());
@@ -103,4 +104,113 @@ function revealDealer (){
 
 function dealerPlay(){
     while (handValue ())
+    }
+
+function isRed(suit) {return suit === 'heart', suit === 'diamond';}
+
+function cardHTML(card,hidden = false) {
+    if (hidden) return `<div class="card hidden"></div>`;
+    const cls= isRed(card.suit) ? 'card red' : 'card';
+    return `
+    <div class="${cls}">
+    <div class="corner top">${card.rank}<br>${card.suit}</div> 
+    </div>`;
+}
+function renderHand(hand, elId, hideSecond = false){
+    const el = document.getElementById(elID);
+    el.innerHTML = hand.map ((c,i) => cardHTML (c, hideSecond && i===1)) .join('');
+}
+function renderScore(hand, elID, hideSecond = false) {
+    const el = document.getElementById;
+    if (hand.length === 0) { el.textContent = '-'; el.className = 'score-badge'; return;}
+    if (hideSecond) { el.textContent ='?'; el.className = 'score-badge'; return;}
+    const v = handValue(hand);
+    el.textContent = v;
+    el.className ='score-badge' + (v>21 ? 'bust' : isBlackjack(hand) ? 'blackjack' : '');
+}
+function returnMessage(msg, cls = '') {
+    const el = document.getElementById('status');
+    el.textContent= msg;
+    el.className= cls;
+}
+function updateBank(){
+    document.getElementById('balance-display').textContent =`$${STATE.balance}`;
+    document.getElementById('bet-amount').textContent =`$${STATE.bet}`;
+    document.getElementById('balance-display').textContent = STATE.wins;
+}
+
+function showBetUI(show) {
+    document.getElementById('action-btns').style.display = show ? 'flex' : 'none';
+    document.getElementById('play-btns').style.display = show ? 'none' : 'flex';
+    document.getElementById('chip-row').style.display = show ? 'flex' : 'none';
+}
+
+function setPlayButtons(canDouble) {
+    document.getElementById('btn-double').disabled = !canDouble;
+}
+ //The Whole Dealing Process:
+function deal() {
+    if (STATE.bet === 0) { setStatus('Place a bet'); return;}
+    STATE.phase = 'play';
+    STATE.balance -= STATE.bet;
+    updateBank();
+
+    STATE.playerHand = [drawCard(), drawCard()];
+    STATE.dealerHand = [drawCard(), drawCard()];
+
+    render(true);
+    showBetUI(false);
+    setPlayButtons(STATE.balance >= STATE.bet);
+
+    //This is next piece of code is to check and see if the player has Blackjack
+    if (isBlackjack (STATE.playerHand)){
+        revealDealer();
+        if (isBlackjack(STATE.dealerHand))  {
+            endRound('push');
+        } else{
+            endRound('blackjack');
+        }
+        return;
+    }
+    setStatus('Your turn');
+}
+//Dealer side of the game
+function revealDealer() {
+    render(false);
+}
+
+function dealerPlay() {
+    while (handValue(STATE.dealerHand) <17 || isSoft17(STATE.dealerHand)) {
+        STATE.dealerHand.push(drawCard());
+    }
+
+    render(false);
+    resolveRound();
+}
+function resolveRound() {
+    const pv = handValue(STATE.playerHand);
+    const dv = handValue(STATE.dealerHand);
+    const dBust =handValue(STATE.dealerHand)
+
+    if (dBust || pv > dv )              endRound('win');
+    else if (pv === dv)                 endRound('push');
+    else                                endRound('lose');
+}
+
+function endRound(result)  {
+    STATE.phase = 'done';
+    let msg, cls, payout;
+
+    switch(result) {
+        case 'blacjack':
+            payout= Math.floor(STATE.bet * 2.5);
+            msg= `Blackjack! +$${payout-STATE.bet}`; cls ='win'; break;
+        case 'win':
+            payout = STATE.bet * 2;
+            msg = `You Win! +$${STATE.bet}`; cls='win'; break;
+        case 'push'
+            payout = STATE.bet;
+            msg = `Push - Bet Returned`; cls='push'; break;
+    }
+
 }
