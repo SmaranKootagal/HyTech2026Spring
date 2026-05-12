@@ -1,0 +1,642 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blackjack Chip Betting</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: green;
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 30px;
+      font-size: 3rem;
+    }
+
+    .top-bar {
+      margin-top: 10px;
+      font-size: 1.5rem;
+    }
+
+    .game-area {
+      margin-top: 20px;
+    }
+
+    .cards {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      width: 80px;
+      height: 120px;
+      background: white;
+      color: black;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+
+    }
+
+    /* CHIP STYLES */
+
+    .chips-container {
+      margin-top: 25px;
+    }
+
+    .chips {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .chip {
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      border: 5px dashed white;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      align-items: center;
+           justify-content: center;
+      color: white;
+      transition: 0.2s;
+    }
+
+    .chip:hover {
+      transform: scale(1.1);
+    }
+
+    .chip5 {
+      background: #3498db;
+    }
+
+    .chip20 {
+      background: #2ecc71;
+    }
+
+    .chip50 {
+      background: #9b59b6;
+    }
+
+    .chip100 {
+      background: #e67e22;
+    }
+
+    .chip1000 {
+      background: #e74c3c;
+    }
+
+    .bet-display {
+      font-size: 1.4rem;
+      margin-top: 10px;
+    }
+
+    .buttons {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 12px 25px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .hit {
+      background: #1e90ff;
+      color: white;
+    }
+
+    .stand {
+      background: #ff9800;
+      color: white;
+    }
+
+    .restart {
+      background: #e53935;
+      color: white;
+    }
+
+    .deal-btn {
+      background: #9c27b0;
+      color: white;
+    }
+
+    .clear-btn {
+      background: #555;
+      color: white;
+    }
+
+    #message {
+      font-size: 1.5rem;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1> Blackjack </h1>
+
+  <div class="top-bar">
+     Balance: $<span id="balance">1000</span>
+  </div>
+
+  <!-- CHIP BETTING -->
+
+  <div class="chips-container">
+
+    <h2>Place Your Bet</h2>
+
+    <div class="chips">
+      <button class="chip chip5" onclick="addBet(5)">$5</button>
+      <button class="chip chip20" onclick="addBet(20)">$20</button>
+      <button class="chip chip50" onclick="addBet(50)">$50</button>
+      <button class="chip chip100" onclick="addBet(100)">$100</button>
+      <button class="chip chip1000" onclick="addBet(1000)">$1000</button>
+    </div>
+
+    <div class="bet-display">
+      Current Bet: $<span id="current-bet">0</span>
+    </div>
+
+    <button class="clear-btn" onclick="clearBet()">
+      Clear Bet
+    </button>
+
+    <button class="deal-btn" onclick="startGame()">
+      Deal Cards
+    </button>
+
+  </div>
+
+  <!-- GAME AREA -->
+
+  <div class="game-area">
+
+    <h2>Dealer</h2>
+
+    <div id="dealer-cards" class="cards"></div>
+
+    <p>
+      Score:
+      <span id="dealer-score">0</span>
+    </p>
+
+    <hr style="width:60%; border:1px solid rgba(255,255,255,0.3);">
+
+    <h2>You</h2>
+
+    <div id="player-cards" class="cards"></div>
+
+    <p>
+      Score:
+      <span id="player-score">0</span>
+    </p>
+
+    <div class="buttons">
+      <button class="hit" onclick="hit()">Hit</button>
+
+      <button class="stand" onclick="stand()">Stand</button>
+
+      <button class="restart" onclick="resetGame()">
+        Reset Balance
+      </button>
+    </div>
+
+    <div id="message"></div>
+
+  </div>
+
+  <script>
+
+    // GAME VARIABLES
+
+    let deck = [];
+
+    let playerCards = [];
+    let dealerCards = [];
+
+    let gameOver = true;
+
+    let balance = 1000;
+
+    let currentBet = 0;
+
+    // UPDATE BALANCE DISPLAY
+
+    function updateBalance() {
+      document.getElementById("balance").textContent = balance;
+    }
+
+    // UPDATE BET DISPLAY
+
+    function updateBetDisplay() {
+      document.getElementById("current-bet").textContent = currentBet;
+    }
+
+    // ADD BET
+
+    function addBet(amount) {
+
+      if (!gameOver) return;
+
+      if (currentBet + amount > balance) {
+        alert("Not enough balance!");
+        return;
+      }
+
+      currentBet += amount;
+
+      updateBetDisplay();
+    }
+
+    // CLEAR BET
+
+    function clearBet() {
+
+      if (!gameOver) return;
+
+      currentBet = 0;
+
+      updateBetDisplay();
+    }
+
+    // CREATE DECK
+
+    function createDeck() {
+
+      const suits = ["♠", "♥", "♦", "♣"];
+
+      const values = [
+        "A", "2", "3", "4", "5",
+        "6", "7", "8", "9", "10",
+        "J", "Q", "K"
+      ];
+
+      deck = [];
+
+      for (let suit of suits) {
+
+        for (let value of values) {
+
+          deck.push({
+            value,
+            suit
+          });
+
+        }
+      }
+
+      shuffleDeck();
+    }
+
+    // SHUFFLE DECK
+
+    function shuffleDeck() {
+
+      for (let i = deck.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+    }
+
+    // GET CARD VALUE
+
+    function getCardValue(card) {
+
+      if (["J", "Q", "K"].includes(card.value)) {
+        return 10;
+      }
+
+      if (card.value === "A") {
+        return 11;
+      }
+
+      return parseInt(card.value);
+    }
+
+    // CALCULATE SCORE
+
+    function calculateScore(cards) {
+
+      let score = 0;
+
+      let aces = 0;
+
+      for (let card of cards) {
+
+        score += getCardValue(card);
+
+        if (card.value === "A") {
+          aces++;
+        }
+      }
+
+      while (score > 21 && aces > 0) {
+
+        score -= 10;
+
+        aces--;
+      }
+
+      return score;
+    }
+
+    // DRAW CARD
+
+    function drawCard(hand) {
+
+      hand.push(deck.pop());
+    }
+
+    // RENDER CARDS
+
+    function renderCards() {
+
+      const playerDiv =
+        document.getElementById("player-cards");
+
+      const dealerDiv =
+        document.getElementById("dealer-cards");
+
+      playerDiv.innerHTML = "";
+
+      dealerDiv.innerHTML = "";
+
+      // PLAYER CARDS
+
+      playerCards.forEach(card => {
+
+        const cardEl = document.createElement("div");
+
+        cardEl.className = "card";
+
+        cardEl.textContent =
+          card.value + card.suit;
+
+        playerDiv.appendChild(cardEl);
+      });
+
+      // DEALER CARDS
+
+      dealerCards.forEach(card => {
+
+        const cardEl = document.createElement("div");
+
+        cardEl.className = "card";
+
+        cardEl.textContent =
+          card.value + card.suit;
+
+        dealerDiv.appendChild(cardEl);
+      });
+
+      // UPDATE SCORES
+
+      document.getElementById("player-score")
+        .textContent =
+        calculateScore(playerCards);
+
+      document.getElementById("dealer-score")
+        .textContent =
+        calculateScore(dealerCards);
+    }
+
+    // END GAME
+
+    function endGame(result) {
+
+      const message =
+        document.getElementById("message");
+
+      gameOver = true;
+
+      if (result === "win") {
+
+        balance += currentBet * 2;
+
+        message.textContent =
+          `You win! +$${currentBet}`;
+      }
+
+      else if (result === "lose") {
+
+        message.textContent =
+          `You lost! -$${currentBet}`;
+      }
+
+      else {
+
+        balance += currentBet;
+
+        message.textContent =
+          "Push! Bet returned.";
+      }
+
+      currentBet = 0;
+
+      updateBalance();
+
+      updateBetDisplay();
+
+      if (balance <= 0) {
+
+        message.textContent +=
+          " Game Over! You're out of money.";
+      }
+    }
+
+    // CHECK WINNER
+
+    function checkWinner() {
+
+      const playerScore =
+        calculateScore(playerCards);
+
+      const dealerScore =
+        calculateScore(dealerCards);
+
+      if (playerScore > 21) {
+
+        endGame("lose");
+      }
+
+      else if (dealerScore > 21) {
+
+        endGame("win");
+      }
+
+      else if (gameOver) {
+
+        if (playerScore > dealerScore) {
+
+          endGame("win");
+        }
+
+        else if (dealerScore > playerScore) {
+
+          endGame("lose");
+        }
+
+        else {
+
+          endGame("tie");
+        }
+      }
+    }
+
+    // HIT
+
+    function hit() {
+
+      if (gameOver) return;
+
+      drawCard(playerCards);
+
+      renderCards();
+
+      if (calculateScore(playerCards) > 21) {
+
+        checkWinner();
+      }
+    }
+
+    // STAND
+
+    function stand() {
+
+      if (gameOver) return;
+
+      gameOver = true;
+
+      while (
+        calculateScore(dealerCards) < 17
+      ) {
+
+        drawCard(dealerCards);
+      }
+
+      renderCards();
+
+      checkWinner();
+    }
+
+    // START GAME
+
+    function startGame() {
+
+      if (!gameOver) return;
+
+      if (currentBet <= 0) {
+
+        alert("Place a bet first!");
+
+        return;
+      }
+
+      if (currentBet > balance) {
+
+        alert("Not enough balance!");
+
+        return;
+      }
+
+      balance -= currentBet;
+
+      updateBalance();
+
+      createDeck();
+
+      playerCards = [];
+
+      dealerCards = [];
+
+      drawCard(playerCards);
+      drawCard(playerCards);
+
+      drawCard(dealerCards);
+      drawCard(dealerCards);
+
+      gameOver = false;
+
+      document.getElementById("message")
+        .textContent = "";
+
+      renderCards();
+    }
+
+    // RESET GAME
+
+    function resetGame() {
+
+      balance = 1000;
+
+      currentBet = 0;
+
+      gameOver = true;
+
+      playerCards = [];
+
+      dealerCards = [];
+
+      document.getElementById(
+        "player-cards"
+      ).innerHTML = "";
+
+      document.getElementById(
+        "dealer-cards"
+      ).innerHTML = "";
+
+      document.getElementById(
+        "player-score"
+      ).textContent = "0";
+
+      document.getElementById(
+        "dealer-score"
+      ).textContent = "0";
+
+      document.getElementById(
+        "message"
+      ).textContent =
+        "Balance reset to $1000";
+
+      updateBalance();
+
+      updateBetDisplay();
+    }
+
+    // INITIAL DISPLAY
+
+    updateBalance();
+
+    updateBetDisplay();
+
+  </script>
+
+</body>
+</html>
